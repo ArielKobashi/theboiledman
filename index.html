@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The Boiled Man: The Deep Below</title>
+  </head>
+  <body>
+    <div class="start-screen">
+      <div class="start-card">
+        <span class="start-kicker">THE DEEP BELOW</span>
+        <h1>The Boiled Man</h1>
+        <p>Desça no labirinto que respira sob a cidade. Ele observa entre as paredes e espera pelo Crimson Awakening.</p>
+        <button class="start-button" type="button">INICIAR</button>
+      </div>
+    </div>
+    <div id="app"></div>
+    <div class="hud" aria-hidden="true">
+      <div class="reticle"></div>
+      <div class="scanline"></div>
+      <div class="status-panel">
+        <span class="signal-dot"></span>
+        <span>THE DEEP BELOW</span>
+      </div>
+      <div class="moon-timer">
+        <span class="moon-timer-label">CRIMSON AWAKENING EM</span>
+        <span class="moon-timer-value">12:00</span>
+      </div>
+      <button class="debug-bloodmoon-button" type="button">FORCAR AWAKENING</button>
+      <div class="lore-panel">AQUELE QUE PERMANECE ENTRE AS PAREDES</div>
+      <div class="whisper-panel">Ninguem ficara sozinho.</div>
+      <div class="xray-glasses">
+        <div class="goggle-chain"></div>
+        <div class="lens lens-left"></div>
+        <div class="lens lens-right"></div>
+        <div class="gear gear-left"></div>
+        <div class="gear gear-right"></div>
+        <div class="bridge"></div>
+        <div class="nose-piece"></div>
+        <div class="temple temple-left"></div>
+        <div class="temple temple-right"></div>
+      </div>
+    </div>
+    <div class="jumpscare" aria-hidden="true">
+      <img src="/assets/enemy.png" alt="" />
+    </div>
+    <div class="death-screen" aria-hidden="true">
+      <span>NOS SEREMOS UM</span>
+    </div>
+    <div class="hide-wall-overlay" aria-hidden="true">
+      <span>ENTRANDO ENTRE AS PAREDES</span>
+    </div>
+    <script src="/audio/normal-theme.js"></script>
+    <script src="/audio/blood-moon-theme.js"></script>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+  </html>
