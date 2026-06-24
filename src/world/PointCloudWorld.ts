@@ -442,7 +442,7 @@ export class PointCloudWorld {
   }
 
   private createEnemies(): void {
-    const enemy = new EnemyBillboard("/assets/enemy.png", new THREE.Vector3(7.2, 1.1, 13.2));
+    const enemy = new EnemyBillboard(`${import.meta.env.BASE_URL}assets/enemy.png`, new THREE.Vector3(7.2, 1.1, 13.2));
     const ai = new EnemyAI(
       enemy,
       () => ({
