@@ -1,0 +1,696 @@
+:root {
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  color: #101010;
+  background: #f8f7f1;
+  --blood-progress: 0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background:
+    radial-gradient(circle at 50% 34%, rgba(0, 0, 0, 0.06), transparent 34%),
+    linear-gradient(180deg, #fbfaf5 0%, #f0efe7 62%, #e4e1d7 100%);
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+}
+
+.start-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(120, 0, 0, 0.1), transparent 32%),
+    repeating-radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.08) 0 1px, transparent 1px 9px),
+    #f8f7f1;
+  color: #090706;
+  transition: opacity 420ms ease, transform 620ms ease;
+}
+
+body.has-started .start-screen {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(1.04);
+}
+
+.start-card {
+  width: min(86vw, 620px);
+  padding: clamp(28px, 6vw, 58px);
+  border: 1px solid rgba(0, 0, 0, 0.36);
+  background: rgba(248, 247, 241, 0.72);
+  box-shadow: 0 18px 80px rgba(0, 0, 0, 0.12);
+}
+
+.start-kicker {
+  font-size: 11px;
+  letter-spacing: 0.32em;
+}
+
+.start-card h1 {
+  margin: 12px 0;
+  font-size: clamp(42px, 10vw, 92px);
+  line-height: 0.9;
+  letter-spacing: -0.06em;
+}
+
+.start-card p {
+  max-width: 42ch;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.start-button {
+  margin-top: 24px;
+  padding: 14px 22px;
+  border: 1px solid #111;
+  background: #111;
+  color: #f8f7f1;
+  font: inherit;
+  letter-spacing: 0.18em;
+  cursor: pointer;
+}
+
+.hud {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  color: rgba(10, 10, 10, 0.72);
+}
+
+.hud::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background:
+    radial-gradient(circle at center, transparent 0 44%, rgba(40, 34, 25, 0.06) 78%, rgba(28, 24, 19, 0.2) 100%),
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.035) 0 1px, transparent 1px 5px);
+  mix-blend-mode: multiply;
+  opacity: 0.72;
+}
+
+body.is-watched .hud::before {
+  opacity: 0.86;
+  background:
+    radial-gradient(circle at center, transparent 0 36%, rgba(40, 34, 25, 0.1) 70%, rgba(28, 24, 19, 0.28) 100%),
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.045) 0 1px, transparent 1px 5px);
+}
+
+body.is-hunted .hud::before {
+  opacity: 0.95;
+  animation: hunt-pulse 620ms ease-in-out infinite;
+}
+
+.reticle {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 28px;
+  height: 28px;
+  transform: translate(-50%, -50%);
+  border: 1px solid rgba(0, 0, 0, 0.54);
+  border-radius: 50%;
+}
+
+.reticle::before,
+.reticle::after {
+  position: absolute;
+  content: "";
+  background: rgba(0, 0, 0, 0.68);
+}
+
+.reticle::before {
+  left: 50%;
+  top: -12px;
+  width: 1px;
+  height: 52px;
+  transform: translateX(-50%);
+}
+
+.reticle::after {
+  left: -12px;
+  top: 50%;
+  width: 52px;
+  height: 1px;
+  transform: translateY(-50%);
+}
+
+.scanline {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.06) 48%, transparent 54%);
+  animation: scan 7s linear infinite;
+  opacity: 0.6;
+}
+
+.status-panel {
+  position: absolute;
+  left: clamp(16px, 4vw, 42px);
+  bottom: clamp(16px, 4vw, 38px);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 32px;
+  padding: 0 12px;
+  border-left: 1px solid rgba(0, 0, 0, 0.42);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+}
+
+body.is-xray-active .status-panel::after {
+  content: " LENTE RAIO X 34M";
+  color: #7a1604;
+}
+
+body.is-blood-moon .status-panel::after {
+  content: " CRIMSON AWAKENING";
+  color: #9e0303;
+}
+
+body.is-blood-moon.is-xray-active .status-panel::after {
+  content: " AWAKENING / LENTE 34M";
+}
+
+body.is-hidden .status-panel::after {
+  content: " ESCONDIDO";
+  color: #0b2b10;
+}
+
+body.is-hidden.is-blood-moon .status-panel::after {
+  content: " ESCONDIDO / AWAKENING";
+}
+
+.signal-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #101010;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.42);
+  animation: pulse 1.8s ease-in-out infinite;
+}
+
+.moon-timer {
+  position: absolute;
+  top: clamp(16px, 4vw, 34px);
+  right: clamp(16px, 4vw, 42px);
+  display: grid;
+  justify-items: end;
+  gap: 3px;
+  padding: 10px 14px;
+  border-right: 1px solid rgba(0, 0, 0, 0.42);
+  background: rgba(248, 247, 241, 0.24);
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.86);
+}
+
+.moon-timer-label {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+}
+
+.moon-timer-value {
+  font-size: clamp(24px, 5vw, 44px);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 0.95;
+  font-variant-numeric: tabular-nums;
+}
+
+.debug-bloodmoon-button {
+  position: absolute;
+  top: clamp(92px, 13vw, 112px);
+  right: clamp(16px, 4vw, 42px);
+  pointer-events: auto;
+  padding: 8px 11px;
+  border: 1px solid rgba(120, 0, 0, 0.62);
+  border-radius: 0;
+  background: rgba(248, 247, 241, 0.58);
+  color: #740000;
+  font: inherit;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.9);
+}
+
+.debug-bloodmoon-button:hover {
+  background: rgba(120, 0, 0, 0.14);
+}
+
+body.is-blood-moon .debug-bloodmoon-button {
+  color: #101010;
+  border-color: rgba(0, 0, 0, 0.42);
+}
+
+body.is-blood-moon .moon-timer {
+  color: #8f0000;
+  border-right-color: rgba(143, 0, 0, 0.68);
+  animation: timer-warning 640ms steps(2, end) infinite;
+}
+
+.lore-panel {
+  position: absolute;
+  left: clamp(16px, 4vw, 42px);
+  top: clamp(16px, 4vw, 34px);
+  width: min(58vw, 520px);
+  padding-left: 12px;
+  border-left: 1px solid rgba(0, 0, 0, 0.32);
+  color: rgba(13, 10, 8, 0.58);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  line-height: 1.5;
+  text-transform: uppercase;
+  text-shadow: 0 0 9px rgba(255, 255, 255, 0.82);
+}
+
+.whisper-panel {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(78px, 13vh, 132px);
+  max-width: min(78vw, 620px);
+  padding: 10px 16px;
+  color: rgba(22, 10, 8, 0.72);
+  font-size: clamp(15px, 2.6vw, 28px);
+  letter-spacing: 0.08em;
+  line-height: 1.25;
+  text-align: center;
+  text-transform: uppercase;
+  text-shadow: 0 0 12px rgba(248, 247, 241, 0.95);
+  opacity: 0;
+  transform: translate(-50%, 22px) scale(0.98);
+  transition: opacity 520ms ease, transform 720ms ease;
+}
+
+.whisper-panel.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1);
+}
+
+.whisper-panel.is-watch {
+  color: rgba(70, 12, 5, 0.82);
+  animation: whisper-waver 1.8s ease-in-out infinite;
+}
+
+.whisper-panel.is-blood {
+  color: rgba(150, 0, 0, 0.92);
+  text-shadow:
+    0 0 8px rgba(255, 240, 220, 0.7),
+    0 0 24px rgba(190, 0, 0, 0.42);
+  animation: whisper-blood 520ms steps(2, end) infinite;
+}
+
+.xray-glasses {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 5;
+  width: min(76vw, 560px);
+  height: min(30vw, 210px);
+  opacity: 0;
+  transform: translate(-50%, -205%) scale(1.18) rotate(-7deg);
+  transition:
+    opacity 180ms ease,
+    transform 720ms cubic-bezier(0.16, 0.94, 0.2, 1);
+}
+
+.lens,
+.bridge,
+.temple,
+.gear,
+.nose-piece {
+  position: absolute;
+  border: 3px solid rgba(45, 25, 6, 0.9);
+  filter:
+    drop-shadow(0 0 7px rgba(178, 84, 17, 0.28))
+    drop-shadow(0 7px 14px rgba(0, 0, 0, 0.18));
+}
+
+.lens {
+  top: 13%;
+  width: 39%;
+  height: 76%;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(250, 214, 112, 0.18), transparent 22%),
+    radial-gradient(circle at 50% 50%, rgba(160, 8, 0, 0.2), transparent 58%),
+    repeating-radial-gradient(circle at 50% 50%, rgba(68, 18, 0, 0.18) 0 1px, transparent 1px 7px);
+  box-shadow:
+    inset 0 0 20px rgba(255, 205, 82, 0.25),
+    inset 0 0 54px rgba(120, 0, 0, 0.24),
+    0 0 0 8px rgba(90, 48, 12, 0.16);
+  animation: lens-grind 2.6s ease-in-out infinite;
+}
+
+.lens-left {
+  left: 7%;
+}
+
+.lens-right {
+  right: 7%;
+}
+
+.bridge {
+  left: 43.6%;
+  top: 45%;
+  width: 12%;
+  height: 20%;
+  border-bottom: 0;
+  border-left: 0;
+  border-right: 0;
+  border-radius: 50%;
+}
+
+.nose-piece {
+  left: 48.5%;
+  top: 55%;
+  width: 3%;
+  height: 28%;
+  border-top: 0;
+  border-left: 0;
+  border-radius: 0 0 50% 50%;
+  transform: rotate(8deg);
+}
+
+.temple {
+  top: 50%;
+  width: 16%;
+  height: 0;
+}
+
+.temple-left {
+  left: -7%;
+  transform: rotate(18deg);
+}
+
+.temple-right {
+  right: -7%;
+  transform: rotate(-18deg);
+}
+
+.gear {
+  top: 37%;
+  width: 10%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background:
+    repeating-conic-gradient(from 12deg, rgba(45, 25, 6, 0.9) 0deg 8deg, transparent 8deg 18deg),
+    radial-gradient(circle, transparent 0 37%, rgba(95, 52, 15, 0.34) 38% 58%, transparent 59%);
+  opacity: 0.9;
+}
+
+.gear-left {
+  left: 0.5%;
+}
+
+.gear-right {
+  right: 0.5%;
+  animation-delay: -420ms;
+}
+
+.goggle-chain {
+  position: absolute;
+  left: 8%;
+  top: -22%;
+  width: 28%;
+  height: 64%;
+  border-top: 3px dotted rgba(45, 25, 6, 0.72);
+  border-left: 3px dotted rgba(45, 25, 6, 0.58);
+  border-radius: 50% 0 0 0;
+  transform: rotate(-14deg);
+  filter: drop-shadow(0 0 8px rgba(178, 84, 17, 0.2));
+}
+
+body.is-xray-active .xray-glasses {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1) rotate(0deg);
+  animation: xray-settle 980ms ease-out both;
+}
+
+body.is-xray-active canvas {
+  filter: sepia(0.72) saturate(0.62) contrast(1.5) brightness(0.86);
+}
+
+body.is-xray-active .reticle {
+  width: 88px;
+  height: 88px;
+  border: 2px solid rgba(72, 33, 6, 0.78);
+  box-shadow:
+    inset 0 0 24px rgba(120, 0, 0, 0.18),
+    0 0 0 10px rgba(98, 54, 12, 0.08);
+}
+
+body.is-xray-active .reticle::before {
+  top: -24px;
+  height: 136px;
+  background: linear-gradient(180deg, transparent, rgba(72, 33, 6, 0.9), transparent);
+}
+
+body.is-xray-active .reticle::after {
+  left: -24px;
+  width: 136px;
+  background: linear-gradient(90deg, transparent, rgba(72, 33, 6, 0.9), transparent);
+}
+
+body.is-xray-active .hud::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background:
+    radial-gradient(circle at center, transparent 0 18%, rgba(248, 207, 120, 0.08) 24%, rgba(58, 24, 6, 0.42) 66%, rgba(0, 0, 0, 0.72) 100%),
+    repeating-radial-gradient(circle at center, rgba(52, 22, 4, 0.16) 0 1px, transparent 1px 10px),
+    linear-gradient(90deg, rgba(110, 40, 0, 0.28), transparent 22% 78%, rgba(110, 40, 0, 0.28));
+  mix-blend-mode: multiply;
+  animation: xray-focus-breathe 1.9s ease-in-out infinite;
+}
+
+body.is-blood-moon .hud::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background:
+    radial-gradient(circle at 64% 23%, rgba(210, 0, 0, calc(0.08 + var(--blood-progress) * 0.28)), transparent calc(12% + var(--blood-progress) * 56%)),
+    radial-gradient(circle at center, transparent 0 32%, rgba(128, 0, 0, calc(0.08 + var(--blood-progress) * 0.14)) 72%, rgba(76, 0, 0, calc(0.2 + var(--blood-progress) * 0.24)) 100%),
+    linear-gradient(180deg, rgba(160, 0, 0, calc(0.08 + var(--blood-progress) * 0.22)), transparent 34% 82%, rgba(80, 0, 0, calc(0.08 + var(--blood-progress) * 0.2)));
+  mix-blend-mode: multiply;
+  animation: blood-moon-pulse 1.8s ease-in-out infinite;
+}
+
+body.is-blood-moon .lore-panel {
+  color: rgba(116, 0, 0, 0.8);
+}
+
+body.is-blood-moon.is-xray-active .hud::after {
+  background:
+    radial-gradient(circle at center, transparent 0 18%, rgba(255, 40, 20, 0.08) 25%, rgba(110, 0, 0, 0.48) 68%, rgba(0, 0, 0, 0.76) 100%),
+    radial-gradient(circle at 64% 23%, rgba(210, 0, 0, calc(0.16 + var(--blood-progress) * 0.28)), transparent calc(14% + var(--blood-progress) * 56%)),
+    repeating-radial-gradient(circle at center, rgba(80, 0, 0, 0.18) 0 1px, transparent 1px 9px),
+    linear-gradient(90deg, rgba(140, 0, 0, 0.2), transparent 18% 82%, rgba(140, 0, 0, 0.2));
+  animation: xray-focus-breathe 1.25s ease-in-out infinite;
+}
+
+.jumpscare {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  background: rgba(248, 247, 241, 0.88);
+  opacity: 0;
+  transform: scale(1.08);
+  transition: opacity 90ms linear, transform 160ms ease-out;
+}
+
+.jumpscare img {
+  width: min(76vw, 420px);
+  image-rendering: pixelated;
+  filter: contrast(1.25);
+}
+
+.death-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 12;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at center, rgba(80, 0, 0, 0.18), rgba(0, 0, 0, 0.72)),
+    rgba(248, 247, 241, 0.56);
+  color: #120000;
+  font-size: clamp(34px, 10vw, 98px);
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  opacity: 0;
+  transform: scale(1.08);
+  transition: opacity 320ms ease, transform 620ms ease;
+}
+
+.hide-wall-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 11;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.36), transparent 18% 82%, rgba(0, 0, 0, 0.36)),
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.14) 0 2px, transparent 2px 10px);
+  color: #f8f7f1;
+  font-size: clamp(18px, 4vw, 42px);
+  letter-spacing: 0.22em;
+  opacity: 0;
+  transform: scaleX(1.4);
+}
+
+body.is-wall-hiding .hide-wall-overlay {
+  animation: wall-hide 950ms ease-in-out both;
+}
+
+body.is-hidden canvas {
+  filter: contrast(0.95) brightness(0.82);
+}
+
+body.is-dead .death-screen {
+  opacity: 1;
+  transform: scale(1);
+}
+
+body.is-dead canvas {
+  filter: contrast(1.4) saturate(0.25);
+}
+
+body.is-jumpscared .jumpscare {
+  opacity: 1;
+  transform: scale(1);
+  animation: scare-shake 120ms steps(2, end) infinite;
+}
+
+body.is-hunted .reticle {
+  border-color: rgba(0, 0, 0, 0.86);
+  transform: translate(-50%, -50%) scale(0.82);
+}
+
+@keyframes scan {
+  from {
+    transform: translateY(-100%);
+  }
+
+  to {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.35;
+    transform: scale(0.72);
+  }
+}
+
+@keyframes scare-shake {
+  50% {
+    transform: translate(8px, -4px) scale(1.03);
+  }
+}
+
+@keyframes hunt-pulse {
+  50% {
+    opacity: 0.66;
+  }
+}
+
+@keyframes xray-settle {
+  0% {
+    filter: blur(2px);
+    transform: translate(-50%, -178%) scale(1.14) rotate(-8deg);
+  }
+
+  38% {
+    transform: translate(-50%, -42%) scale(1.06) rotate(2deg);
+  }
+
+  62% {
+    transform: translate(-50%, -53%) scale(0.98) rotate(-1deg);
+  }
+
+  100% {
+    filter: blur(0);
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes lens-grind {
+  50% {
+    box-shadow:
+      inset 0 0 30px rgba(255, 205, 82, 0.34),
+      inset 0 0 60px rgba(120, 0, 0, 0.3),
+      0 0 0 10px rgba(90, 48, 12, 0.12);
+  }
+}
+
+@keyframes xray-focus-breathe {
+  50% {
+    opacity: 0.72;
+  }
+}
+
+@keyframes blood-moon-pulse {
+  50% {
+    opacity: 0.62;
+  }
+}
+
+@keyframes timer-warning {
+  50% {
+    transform: translateX(-3px);
+    opacity: 0.72;
+  }
+}
+
+@keyframes whisper-waver {
+  50% {
+    transform: translate(-50%, -2px) scale(1.015);
+    opacity: 0.78;
+  }
+}
+
+@keyframes whisper-blood {
+  50% {
+    transform: translate(calc(-50% + 4px), -1px) scale(1.02);
+  }
+}
+
+@keyframes wall-hide {
+  0% {
+    opacity: 0;
+    transform: scaleX(1.4);
+  }
+
+  38% {
+    opacity: 1;
+    transform: scaleX(0.42);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scaleX(1.08);
+  }
+}

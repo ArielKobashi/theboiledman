@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Teste Lua Sangrenta 8-Bit</title>
+<style>
+  body { background: #090000; color: #eee; font-family: Arial, sans-serif; text-align: center; padding-top: 60px; }
+  button { padding: 14px 24px; margin: 8px; border: 0; border-radius: 8px; background: #8b0000; color: white; cursor: pointer; font-size: 16px; }
+</style>
+</head>
+<body>
+<h1>Teste - Lua Sangrenta</h1>
+<button onclick="start()">Tocar</button>
+<button onclick="stop()">Parar</button>
+<p id="status">Parado</p>
+<script src="blood-moon-theme.js"></script>
+<script>
+let ctx;
+let gain;
+let theme;
+function start() {
+  stop();
+  ctx = new AudioContext();
+  gain = ctx.createGain();
+  gain.gain.value = 0.30;
+  gain.connect(ctx.destination);
+  theme = new BloodMoonTheme8Bit(ctx, gain);
+  document.getElementById("status").innerText = "Tocando Lua Sangrenta";
+  theme.start(() => document.getElementById("status").innerText = "Lua Sangrenta terminou");
+}
+function stop() {
+  if (theme) theme.stop();
+  if (ctx) ctx.close();
+  document.getElementById("status").innerText = "Parado";
+}
+</script>
+</body>
+</html>

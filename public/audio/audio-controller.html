@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Blood Moon Audio Controller</title>
+<style>
+  body { background: #050505; color: #eee; font-family: Arial, sans-serif; text-align: center; padding-top: 60px; }
+  button { padding: 14px 24px; margin: 8px; border: 0; border-radius: 8px; background: #222; color: white; cursor: pointer; font-size: 16px; }
+  .blood { background: #8b0000; }
+</style>
+</head>
+<body>
+<h1>Sistema Musical - Lua Sangrenta</h1>
+<button onclick="startAudio()">Iniciar Ciclo</button>
+<button onclick="stopAudio()">Parar</button>
+<button class="blood" onclick="forceBloodMoon()">Forcar Lua Sangrenta</button>
+<p id="status">Parado</p>
+<script src="normal-theme.js"></script>
+<script src="blood-moon-theme.js"></script>
+<script>
+let ctx;
+let masterGain;
+let normalTheme;
+let bloodTheme;
+let playing = false;
+function startAudio() {
+  if (playing) return;
+  ctx = new AudioContext();
+  masterGain = ctx.createGain();
+  masterGain.gain.value = 0.28;
+  masterGain.connect(ctx.destination);
+  normalTheme = new NormalTheme8Bit(ctx, masterGain);
+  bloodTheme = new BloodMoonTheme8Bit(ctx, masterGain);
+  playing = true;
+  playNormal();
+}
+function stopAudio() {
+  playing = false;
+  if (normalTheme) normalTheme.stop();
+  if (bloodTheme) bloodTheme.stop();
+  if (ctx) ctx.close();
+  document.getElementById("status").innerText = "Parado";
+}
+function playNormal() {
+  if (!playing) return;
+  if (bloodTheme) bloodTheme.stop();
+  document.getElementById("status").innerText = "Musica normal - 12 minutos";
+  normalTheme.duration = 12 * 60 * 1000;
+  normalTheme.start(() => playBloodMoon());
+}
+function playBloodMoon() {
+  if (!playing) return;
+  if (normalTheme) normalTheme.stop();
+  document.getElementById("status").innerText = "LUA SANGRENTA - 1 minuto";
+  bloodTheme.duration = 60 * 1000;
+  bloodTheme.start(() => playNormal());
+}
+function forceBloodMoon() {
+  if (!playing) startAudio();
+  playBloodMoon();
+}
+</script>
+</body>
+</html>
