@@ -8,6 +8,7 @@ export class EnemyBillboard {
   private visibilityBoost = 1;
   private gazeLocked = false;
   private xRayFocus = false;
+  private wallOccluded = false;
   private pulse = 0;
   private gaitPhase = 0;
 
@@ -90,7 +91,7 @@ export class EnemyBillboard {
   }
 
   setVisible(visible: boolean): void {
-    this.sprite.visible = visible;
+    this.sprite.visible = visible && (!this.wallOccluded || this.xRayFocus);
   }
 
   setScareScale(active: boolean): void {
@@ -101,13 +102,13 @@ export class EnemyBillboard {
     this.presenceMode = mode;
     if (mode !== "watch") this.gazeLocked = false;
     if (mode === "hidden") this.xRayFocus = false;
-    this.sprite.visible = mode !== "hidden";
     this.visibilityBoost = mode === "watch" ? 1.28 : mode === "chase" ? 1.15 : mode === "scare" ? 1.7 : 1;
     this.sprite.material.opacity = mode === "watch" ? 1 : mode === "stalk" ? 0.82 : 1;
     this.sprite.material.depthTest = true;
     this.sprite.material.depthWrite = true;
     this.sprite.material.color.set(0xffffff);
     this.sprite.renderOrder = 0;
+    this.refreshVisibility();
   }
 
   setGazeLocked(active: boolean): void {
@@ -117,20 +118,29 @@ export class EnemyBillboard {
   setXRayVisible(active: boolean): void {
     this.xRayFocus = active;
     if (!active) {
-      this.sprite.visible = this.presenceMode !== "hidden";
       this.sprite.material.depthTest = true;
       this.sprite.material.depthWrite = true;
       this.sprite.material.opacity = this.presenceMode === "watch" ? 1 : this.presenceMode === "stalk" ? 0.82 : 1;
       this.sprite.material.color.set(0xffffff);
       this.sprite.renderOrder = 0;
+      this.refreshVisibility();
       return;
     }
 
-    this.sprite.visible = true;
     this.sprite.material.depthTest = false;
     this.sprite.material.depthWrite = false;
     this.sprite.material.opacity = 1;
     this.sprite.material.color.set(0xff3326);
     this.sprite.renderOrder = 90;
+    this.refreshVisibility();
+  }
+
+  setWallOccluded(occluded: boolean): void {
+    this.wallOccluded = occluded;
+    this.refreshVisibility();
+  }
+
+  private refreshVisibility(): void {
+    this.sprite.visible = this.presenceMode !== "hidden" && (!this.wallOccluded || this.xRayFocus);
   }
 }

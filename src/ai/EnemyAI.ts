@@ -343,7 +343,7 @@ export class EnemyAI {
       return;
     }
     if (this.sensors.canSeePlayer() || this.world.isBloodMoonActive()) {
-      this.moveTo(this.getPlayer().position, 4.65, dt);
+      this.moveThroughMazeTo(this.getPlayer().position, 4.65, dt);
     } else {
       this.changeState(EnemyState.Search);
     }
@@ -393,6 +393,18 @@ export class EnemyAI {
   private moveTo(target: THREE.Vector3, speed: number, dt: number): void {
     const desired = this.enemy.position.clone();
     const waypoint = this.world.raycastWall(desired, target) ? this.world.getPathStep(desired, target) : target;
+    this.stepToward(waypoint, speed, dt);
+  }
+
+  private moveThroughMazeTo(target: THREE.Vector3, speed: number, dt: number): void {
+    const desired = this.enemy.position.clone();
+    const closeEnoughToLunge = desired.distanceTo(target) < 2.4 && !this.world.raycastWall(desired, target);
+    const waypoint = closeEnoughToLunge ? target : this.world.getPathStep(desired, target);
+    this.stepToward(waypoint, speed, dt);
+  }
+
+  private stepToward(waypoint: THREE.Vector3, speed: number, dt: number): void {
+    const desired = this.enemy.position.clone();
     const direction = waypoint.clone().sub(desired).setY(0);
     if (direction.lengthSq() < 0.01) return;
     direction.normalize().multiplyScalar(speed * dt);

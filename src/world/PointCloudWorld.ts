@@ -172,6 +172,7 @@ export class PointCloudWorld {
 
   setXRayMode(active: boolean, playerPosition: THREE.Vector3): void {
     for (const enemy of this.enemies) {
+      enemy.setWallOccluded(this.raycastWall(playerPosition, enemy.position));
       enemy.setXRayVisible(active && enemy.position.distanceTo(playerPosition) <= PointCloudWorld.xRayRange);
     }
   }
