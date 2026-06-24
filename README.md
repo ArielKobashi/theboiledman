@@ -10,6 +10,19 @@ O jogador desce ate o complexo e encontra "Aquele que permanece entre as paredes
 
 Durante o ciclo normal, o Boiled Man observa, aparece em quinas e desaparece quando o jogador se move ou se aproxima. A cada 12 minutos acontece o Crimson Awakening, quando a Queda Vermelha retorna por 1 minuto e a entidade assume forma fisica.
 
+## Modo Historia
+
+A narrativa agora e dirigida por atos, objetivos e eventos do jogador:
+
+- `Ato I - Descida`: apresenta a catedral subterranea, a cidade isolada e a ideia de que o labirinto reage ao jogador
+- `Ato II - A Casa Aprende`: comeca no primeiro contato visual, explicando as regras de observacao, quinas e movimento
+- `Ato IV - Crimson Awakening`: muda o objetivo para fuga direta, esconderijos e sobrevivencia de 1 minuto
+- `Ato V - A Parte Faltando`: aparece apos sobreviver ao despertar e aponta para o plot twist do protagonista
+- objetivos aparecem no HUD para guiar o jogador sem quebrar o misterio
+- sussurros sao disparados por eventos importantes, nao sorteados sem contexto
+- falas ambientais entram com intervalo maior para reforcar mundo, trauma e memoria
+- o Boiled Man fala pouco e em momentos marcantes, para parecer intencional
+
 ## Stack
 
 - TypeScript
@@ -20,6 +33,7 @@ Durante o ciclo normal, o Boiled Man observa, aparece em quinas e desaparece qua
 
 - `src/runtime` contem o nucleo do jogo
 - `src/scene` organiza a cena 3D e a narrativa de HUD
+- `src/story` controla atos, objetivos e sussurros do modo historia
 - `src/systems` guarda controle de primeira pessoa e sistemas
 - `src/world` representa o mundo, o labirinto e sua camada de pontos
 

@@ -270,14 +270,43 @@ body.is-blood-moon .moon-timer {
   left: clamp(16px, 4vw, 42px);
   top: clamp(16px, 4vw, 34px);
   width: min(58vw, 520px);
+  display: grid;
+  gap: 6px;
   padding-left: 12px;
   border-left: 1px solid rgba(0, 0, 0, 0.32);
   color: rgba(13, 10, 8, 0.58);
-  font-size: 11px;
-  letter-spacing: 0.16em;
   line-height: 1.5;
-  text-transform: uppercase;
   text-shadow: 0 0 9px rgba(255, 255, 255, 0.82);
+}
+
+.lore-panel strong {
+  color: rgba(12, 8, 6, 0.82);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.lore-panel span {
+  max-width: 52ch;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+
+.objective-panel {
+  position: absolute;
+  left: clamp(16px, 4vw, 42px);
+  top: clamp(92px, 14vw, 118px);
+  max-width: min(58vw, 520px);
+  padding: 8px 12px;
+  border: 1px solid rgba(0, 0, 0, 0.26);
+  background: rgba(248, 247, 241, 0.42);
+  color: rgba(7, 7, 7, 0.68);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  line-height: 1.45;
+  text-transform: uppercase;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.82);
 }
 
 .whisper-panel {
@@ -494,6 +523,12 @@ body.is-blood-moon .hud::after {
 
 body.is-blood-moon .lore-panel {
   color: rgba(116, 0, 0, 0.8);
+}
+
+body.is-blood-moon .lore-panel strong,
+body.is-blood-moon .objective-panel {
+  color: rgba(116, 0, 0, 0.86);
+  border-color: rgba(116, 0, 0, 0.32);
 }
 
 body.is-blood-moon.is-xray-active .hud::after {
